@@ -1,10 +1,15 @@
-import { createTheme } from '@mui/material/styles';
+import { useContext } from 'react';
 import NextHead from 'next/Head';
 import NextLink from 'next/link';
-import { AppBar, Box, CssBaseline, Link, ThemeProvider, Toolbar, Typography, Container } from '@mui/material';
-import layoutStyles from '../utils/styles'
+import { AppBar, Box, CssBaseline, Container, Link, Switch, ThemeProvider, Toolbar, Typography } from '@mui/material';
+import { createTheme } from '@mui/material/styles';
+import layoutStyles from '../utils/layoutStyles';
+import { Store } from '../utils/Store';
+import jsCookie from 'js-cookie';
 
 export default function Layout({ title, description, children }) {
+  const { state, dispatch } = useContext(Store);
+  const { darkMode } = state;
   const theme = createTheme({
     components: {
       MuiLink: {
@@ -26,7 +31,7 @@ export default function Layout({ title, description, children }) {
       },
     },
     palette: {
-      mode: 'light',
+      mode: darkMode ? 'dark' : 'light',
       primary: {
         main: '#f0c000',
       },
@@ -35,6 +40,12 @@ export default function Layout({ title, description, children }) {
       },
     },
   });
+
+  const darkModeChangeHandler = () => {
+    dispatch({ type: darkMode ? 'DARK_MODE_OFF' : 'DARK_MODE_ON' });
+    const newDarkMode = !darkMode;
+    jsCookie.set('darkMode', newDarkMode ? 'ON' : 'OFF');
+  };
 
   return (
     <>
@@ -45,13 +56,19 @@ export default function Layout({ title, description, children }) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AppBar position="static" sx={layoutStyles.appbar}>
-          <Toolbar sx={layoutStyles.toolbar}>
+          <Box display="flex" alignItems="center">
             <NextLink href="/" passHref>
               <Link>
                 <Typography sx={layoutStyles.brand}>Shop</Typography>
               </Link>
             </NextLink>
-          </Toolbar>
+          </Box>
+          <Box>
+            <Switch
+              checked={darkMode}
+              onChange={darkModeChangeHandler}>
+            </Switch>
+          </Box>
         </AppBar>
         <Container component="main" sx={layoutStyles.main}>
           {children}

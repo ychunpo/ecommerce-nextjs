@@ -1,4 +1,11 @@
-const LayoutStyles = {
+const layoutStyles = {
+  section: {
+    marginTop: 1,
+    marginBottom: 1,
+  },
+  smallText: {
+    fontSize: '15px',
+  },
   main: {
     marginTop: 2,
     minHeight: '80vh',
@@ -23,4 +30,4 @@ const LayoutStyles = {
   },
 };
 
-export default LayoutStyles;
+export default layoutStyles;
