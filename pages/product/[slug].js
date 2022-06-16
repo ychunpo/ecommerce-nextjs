@@ -11,7 +11,7 @@ import {
   Rating,
   Typography,
 } from '@mui/material';
-import Image from 'next/image';
+import NextImage from 'next/image';
 import NextLink from 'next/link';
 import { useContext, useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
@@ -96,7 +96,7 @@ export default function ProductScreen(props) {
           </Box>
           <Grid container spacing={1}>
             <Grid item md={6} xs={12}>
-              <Image
+              <NextImage
                 src={urlFor(product.image)}
                 alt={product.name}
                 layout="responsive"

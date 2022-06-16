@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
+import NextImage from 'next/image';
 import NextLink from 'next/link';
 import { useSnackbar } from 'notistack';
 import { useContext } from 'react';
@@ -89,17 +89,17 @@ function CartScreen() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {cartItems.map((item) => (
-                    <TableRow key={item._key}>
+                  {cartItems.map((item, index) => (
+                    <TableRow key={item._key + index}>
                       <TableCell>
                         <NextLink href={`/product/${item.slug}`} passHref>
                           <Link>
-                            <Image
+                            <NextImage
                               src={item.image}
                               alt={item.name}
                               width={50}
                               height={50}
-                            ></Image>
+                            ></NextImage>
                           </Link>
                         </NextLink>
                       </TableCell>
@@ -117,8 +117,8 @@ function CartScreen() {
                             updateCartHandler(item, e.target.value)
                           }
                         >
-                          {[...Array(item.countInStock).keys()].map((x) => (
-                            <MenuItem key={x + 1} value={x + 1}>
+                          {[...Array(item.countInStock).keys()].map((x, index) => (
+                            <MenuItem key={index + x + 1} value={x + 1}>
                               {x + 1}
                             </MenuItem>
                           ))}
