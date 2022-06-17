@@ -2,7 +2,7 @@ import { useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
-import { Alert, CircularProgress, Grid, Typography } from '@mui/material';
+import { Alert, CircularProgress, Grid } from '@mui/material';
 import Layout from '../components/Layout';
 import ProductItem from '../components/ProductItem';
 import client from '../utils/client';

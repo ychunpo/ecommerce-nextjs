@@ -5,15 +5,26 @@ import {
   Button,
   Container,
   CssBaseline,
+  Divider,
+  Drawer,
+  IconButton,
+  InputBase,
   Link,
+  List,
+  ListItem,
+  ListItemText,
   Menu,
   MenuItem,
   Switch,
   ThemeProvider,
   Toolbar,
-  Typography
+  Typography,
+  useMediaQuery,
 } from '@mui/material';
-import { useContext, useState } from 'react';
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
+import CancelIcon from '@mui/icons-material/Cancel';
+import { useContext, useEffect, useState } from 'react';
 import NextHead from 'next/Head';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
@@ -21,6 +32,9 @@ import { createTheme } from '@mui/material/styles';
 import layoutStyles from '../utils/layoutStyles';
 import { Store } from '../utils/Store';
 import jsCookie from 'js-cookie';
+import axios from 'axios';
+import { useSnackbar } from 'notistack';
+import { getError } from '../utils/error';
 
 export default function Layout({ title, description, children }) {
   const router = useRouter();
@@ -78,7 +92,42 @@ export default function Layout({ title, description, children }) {
     dispatch({ type: 'USER_LOGOUT' });
     jsCookie.remove('userInfo');
     jsCookie.remove('cartItems');
+    jsCookie.remove('shippingAddress');
+    jsCookie.remove('paymentMethod');
     router.push('/');
+  };
+
+  const [sidbarVisible, setSidebarVisible] = useState(false);
+  const sidebarOpenHandler = () => {
+    setSidebarVisible(true);
+  };
+  const sidebarCloseHandler = () => {
+    setSidebarVisible(false);
+  };
+
+  const { enqueueSnackbar } = useSnackbar();
+  const [categories, setCategories] = useState([]);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data } = await axios.get(`/api/products/categories`);
+        setCategories(data);
+      } catch (err) {
+        enqueueSnackbar(getError(err), { variant: 'error' });
+      }
+    };
+    fetchCategories();
+  }, [enqueueSnackbar]);
+
+  const isDesktop = useMediaQuery('(min-width:600px)');
+
+  const [query, setQuery] = useState('');
+  const queryChangeHandler = (e) => {
+    setQuery(e.target.value);
+  };
+  const submitHandler = (e) => {
+    e.preventDefault();
+    router.push(`/search?query=${query}`);
   };
 
   return (
@@ -94,11 +143,79 @@ export default function Layout({ title, description, children }) {
           <Toolbar sx={layoutStyles.toolbar}>
             <Box display="flex" alignItems="center">
 
+              <IconButton
+                edge="start"
+                aria-label="open drawer"
+                onClick={sidebarOpenHandler}
+                sx={layoutStyles.menuButton}
+              >
+                <MenuIcon sx={layoutStyles.navbarButton} />
+              </IconButton>
+
               <NextLink href="/" passHref>
                 <Link>
                   <Typography sx={layoutStyles.brand}>Shop</Typography>
                 </Link>
               </NextLink>
+            </Box>
+
+            <Drawer
+              anchor="left"
+              open={sidbarVisible}
+              onClose={sidebarCloseHandler}
+            >
+              <List>
+                <ListItem>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
+                    <Typography>Shopping by category</Typography>
+                    <IconButton
+                      aria-label="close"
+                      onClick={sidebarCloseHandler}
+                    >
+                      <CancelIcon />
+                    </IconButton>
+                  </Box>
+                </ListItem>
+                <Divider light />
+                {categories.map((category) => (
+                  <NextLink
+                    key={category}
+                    href={`/search?category=${category}`}
+                    passHref
+                  >
+                    <ListItem
+                      button
+                      component="a"
+                      onClick={sidebarCloseHandler}
+                    >
+                      <ListItemText primary={category}></ListItemText>
+                    </ListItem>
+                  </NextLink>
+                ))}
+              </List>
+            </Drawer>
+            <Box sx={isDesktop ? layoutStyles.visible : layoutStyles.hidden}>
+              <form onSubmit={submitHandler}>
+                <Box sx={layoutStyles.searchForm}>
+                  <InputBase
+                    name="query"
+                    sx={layoutStyles.searchInput}
+                    placeholder="Search products"
+                    onChange={queryChangeHandler}
+                  />
+                  <IconButton
+                    type="submit"
+                    sx={layoutStyles.searchButton}
+                    aria-label="search"
+                  >
+                    <SearchIcon />
+                  </IconButton>
+                </Box>
+              </form>
             </Box>
 
             <Box>
@@ -146,6 +263,15 @@ export default function Layout({ title, description, children }) {
                     >
                       Profile
                     </MenuItem>
+
+                    <MenuItem
+                      onClick={(e) =>
+                        loginMenuCloseHandler(e, '/order-history')
+                      }
+                    >
+                      Order History
+                    </MenuItem>
+
                     <MenuItem onClick={logoutClickHandler}>Logout</MenuItem>
                   </Menu>
                 </>
